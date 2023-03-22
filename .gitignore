@@ -1,2 +1,12 @@
 node_modules
 .env
+src/routes/ranking.js
+src/routes/urls.routes.js
+src/routes/user.routes.js
+src/schemas/urlSchema.js
+src/schemas/userSchema.js
+src/middlewares/url.middleware.js
+src/controllers/ranking.controller.js
+src/controllers/url.conttroller.js
+src/controllers/user.Controller.js
+src/middlewares/user.middleware.js
