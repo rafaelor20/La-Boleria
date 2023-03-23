@@ -7,7 +7,7 @@ export async function registerOrder(req, res) {
 
     try {
         const client = await db.query(`SELECT id FROM clients WHERE id = $1`, [order.clientId])
-        console.log(client)
+        
         if (client.rowCount === 0){
             return res.status(404).send("Client does not exist")
         }
@@ -17,9 +17,20 @@ export async function registerOrder(req, res) {
             return res.status(404).send("Cake does not exist")
         }
 
-        await db.query(`INSERT INTO orders (clientId, cakeId, quantity, totalPrice) VALUES ($1, $2, $3, $4)`, 
+        await db.query(`INSERT INTO orders (clientId, "cakeId", quantity, totalPrice) VALUES ($1, $2, $3, $4)`, 
             [order.clientId, order.cakeId, order.quantity, order.totalPrice])
         return res.status(201).send("Order registered")
+
+    } catch (error) {
+        return res.send(error).status(500)
+    }
+}
+
+export async function getOrders(req, res){
+    try {
+        const orders = await db.query(`SELECT * FROM orders JOIN cakes ON (orders.cakeId = cakes.id) JOIN clients ON (orders.clientId = clients.id)`)
+        console.log(orders)
+        return res.status(200).send(orders.rows)
 
     } catch (error) {
         return res.send(error).status(500)

@@ -15,8 +15,8 @@ CREATE TABLE clients (
 
 CREATE TABLE orders (
     id serial PRIMARY KEY,
-    clientId integer REFERENCES clients(id),
-    cakeId integer REFERENCES cakes(id),
+    "clientId" integer REFERENCES clients(id),
+    "cakeId" integer REFERENCES cakes(id),
     quantity integer,
     createdAt timestamp DEFAULT NOW(),
     totalPrice integer
