@@ -1,4 +1,5 @@
 import { clientSchema } from "../schemas/clientSchema.js"
+
 export async function clientValidation(req, res, next) {
 
     const { name, address, phone} = req.body
