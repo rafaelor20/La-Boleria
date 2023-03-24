@@ -27,6 +27,25 @@ export async function registerOrder(req, res) {
     }
 }
 
+export async function getOrdersByClientId(req, res) {
+    const id = req.params.id
+    console.log(id)
+    try {
+        const orders = await db.query(`SELECT * FROM orders 
+        JOIN cakes ON (orders.cakeId = cakes.id) 
+        JOIN clients ON (orders.clientId = clients.id)
+        WHERE orders.clientId = $1`, [id])
+
+        if (orders.rowCount === 0) {
+            return res.status(404).send("No orders registered")
+        } else {
+            return res.status(200).send(transformData(orders.rows))
+        }
+    } catch (error) {
+        return res.send(error).status(500)
+    }
+}
+
 export async function getOrdersById(req, res) {
     const id = req.params.id
     try {
