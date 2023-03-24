@@ -50,7 +50,7 @@ export async function getOrdersByClientId(req, res) {
 export async function getOrdersById(req, res) {
     const id = req.params.id
     try {
-        const orders = await db.query(`SELECT * FROM orders 
+        const orders = await db.query(`SELECT orders.*, clients.*, cakes.name as "cakeName", cakes.* FROM orders 
         JOIN cakes ON (orders."cakeId" = cakes.id) 
         JOIN clients ON (orders."clientId" = clients.id)
         WHERE orders.id = $1`, [id])
