@@ -68,7 +68,7 @@ export async function getOrders(req, res) {
     try {
 
         const date = req.query.date
-
+        
         if (date === undefined) {
             const orders = await db.query(`SELECT * FROM orders JOIN cakes ON (orders.cakeId = cakes.id) JOIN clients ON (orders.clientId = clients.id)`)
 
@@ -83,13 +83,13 @@ export async function getOrders(req, res) {
             const { error } = dateSchema.validate({ date }, { abortEarly: false })
 
             if (error) {
-                return res.send(error).status(422)
+                return res.status(422).send(error)
             } else {
-                console.log(formatDate(date))
+                
                 const orders = await db.query(`SELECT * FROM orders 
                 JOIN cakes ON (orders.cakeId = cakes.id) 
                 JOIN clients ON (orders.clientId = clients.id) 
-                WHERE orders.createdAt = %1`, [formatDate(date)])
+                WHERE date_trunc('day', orders.createdAt) = $1`, [date])
 
                 if (orders.rowCount === 0) {
                     return res.status(404).send("No orders registered")
@@ -102,8 +102,13 @@ export async function getOrders(req, res) {
         }
 
     } catch (error) {
-        return res.send(error).status(500)
+        return res.status(500).send(error)
     }
+}
+
+function formatDate2(date) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit'};
+    return new Date(date).toLocaleString('pt-BR', options);
 }
 
 function formatDate(date) {
