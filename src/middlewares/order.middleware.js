@@ -10,12 +10,18 @@ export async function orderValidation(req, res, next) {
     try {
         if (error) {
             console.log(error)
-            return res.status(422).send("Há um erro com os dados")
+
+            if (error.details[0].message === `"quantity" must be less than or equal to 5`){
+                return res.status(400).send(error)
+            } else {
+                return res.status(422).send(error)
+            }
+
         }
     }
     catch (error) {
         console.error(error)
-        res.status(500).send("Houve um problema no servidor")
+        res.status(500).send(error)
     }
 
     res.locals.order =  { clientId, cakeId, quantity, totalPrice}

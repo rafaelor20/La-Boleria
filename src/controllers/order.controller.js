@@ -7,6 +7,7 @@ export async function registerOrder(req, res) {
     order.totalPrice = order.totalPrice * 100
 
     try {
+
         const client = await db.query(`SELECT id FROM clients WHERE id = $1`, [order.clientId])
 
         if (client.rowCount === 0) {
@@ -18,7 +19,7 @@ export async function registerOrder(req, res) {
             return res.status(404).send("Cake does not exist")
         }
 
-        await db.query(`INSERT INTO orders (clientId, "cakeId", quantity, totalPrice) VALUES ($1, $2, $3, $4)`,
+        await db.query(`INSERT INTO orders ("clientId", "cakeId", quantity, "totalPrice") VALUES ($1, $2, $3, $4)`,
             [order.clientId, order.cakeId, order.quantity, order.totalPrice])
         return res.status(201).send("Order registered")
 
@@ -29,17 +30,16 @@ export async function registerOrder(req, res) {
 
 export async function getOrdersByClientId(req, res) {
     const id = req.params.id
-    console.log(id)
+    
     try {
-        const orders = await db.query(`SELECT * FROM orders 
-        JOIN cakes ON (orders.cakeId = cakes.id) 
-        JOIN clients ON (orders.clientId = clients.id)
-        WHERE orders.clientId = $1`, [id])
+        const orders = await db.query(`SELECT orders.id, orders.quantity, orders."createdAt", orders."totalPrice", cakes.name FROM orders 
+        JOIN cakes ON (orders."cakeId" = cakes.id) 
+        WHERE orders."clientId" = $1`, [id])
 
         if (orders.rowCount === 0) {
             return res.status(404).send("No orders registered")
         } else {
-            return res.status(200).send(transformData(orders.rows))
+            return res.status(200).send(transformList(orders.rows))
         }
     } catch (error) {
         return res.send(error).status(500)
@@ -50,8 +50,8 @@ export async function getOrdersById(req, res) {
     const id = req.params.id
     try {
         const orders = await db.query(`SELECT * FROM orders 
-        JOIN cakes ON (orders.cakeId = cakes.id) 
-        JOIN clients ON (orders.clientId = clients.id)
+        JOIN cakes ON (orders."cakeId" = cakes.id) 
+        JOIN clients ON (orders."clientId" = clients.id)
         WHERE orders.id = $1`, [id])
 
         if (orders.rowCount === 0) {
@@ -70,7 +70,7 @@ export async function getOrders(req, res) {
         const date = req.query.date
         
         if (date === undefined) {
-            const orders = await db.query(`SELECT * FROM orders JOIN cakes ON (orders.cakeId = cakes.id) JOIN clients ON (orders.clientId = clients.id)`)
+            const orders = await db.query(`SELECT * FROM orders JOIN cakes ON (orders."cakeId" = cakes.id) JOIN clients ON (orders."clientId" = clients.id)`)
 
             if (orders.rowCount === 0) {
                 return res.status(404).send("No orders registered")
@@ -87,9 +87,9 @@ export async function getOrders(req, res) {
             } else {
                 
                 const orders = await db.query(`SELECT * FROM orders 
-                JOIN cakes ON (orders.cakeId = cakes.id) 
-                JOIN clients ON (orders.clientId = clients.id) 
-                WHERE date_trunc('day', orders.createdAt) = $1`, [date])
+                JOIN cakes ON (orders."cakeId" = cakes.id) 
+                JOIN clients ON (orders."clientId" = clients.id) 
+                WHERE date_trunc('day', orders."createdAt") = $1`, [date])
 
                 if (orders.rowCount === 0) {
                     return res.status(404).send("No orders registered")
@@ -105,6 +105,31 @@ export async function getOrders(req, res) {
         return res.status(500).send(error)
     }
 }
+
+function transformList(list) {
+    const transformedList = [];
+    
+    for (let item of list) {
+      const { id, quantity, createdAt, totalPrice, name } = item;
+      
+      const date = createdAt;
+      const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
+      
+      
+      const transformedItem = {
+        orderId: id,
+        quantity: quantity,
+        createdAt: formattedDate,
+        totalPrice: totalPrice / 100, 
+        cakeName: name
+      };
+      
+      transformedList.push(transformedItem);
+    }
+    
+    return transformedList;
+  }
+  
 
 function formatDate2(date) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit'};
