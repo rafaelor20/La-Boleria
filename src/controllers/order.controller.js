@@ -71,7 +71,9 @@ export async function getOrders(req, res) {
         const date = req.query.date
         
         if (date === undefined) {
-            const orders = await db.query(`SELECT * FROM orders JOIN cakes ON (orders."cakeId" = cakes.id) JOIN clients ON (orders."clientId" = clients.id)`)
+            const orders = await db.query(`SELECT orders.*, clients.*, cakes.name as "cakeName", cakes.* FROM orders 
+            JOIN cakes ON (orders."cakeId" = cakes.id) 
+            JOIN clients ON (orders."clientId" = clients.id)`)
 
             if (orders.rowCount === 0) {
                 return res.status(404).send("No orders registered")
@@ -87,7 +89,7 @@ export async function getOrders(req, res) {
                 return res.status(422).send(error)
             } else {
                 
-                const orders = await db.query(`SELECT * FROM orders 
+                const orders = await db.query(`SELECT orders.*, clients.*, cakes.name as "cakeName", cakes.* FROM orders 
                 JOIN cakes ON (orders."cakeId" = cakes.id) 
                 JOIN clients ON (orders."clientId" = clients.id) 
                 WHERE date_trunc('day', orders."createdAt") = $1`, [date])
@@ -130,12 +132,6 @@ function transformList(list) {
     
     return transformedList;
   }
-  
-
-function formatDate2(date) {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit'};
-    return new Date(date).toLocaleString('pt-BR', options);
-}
 
 function formatDate(date) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric' };
@@ -149,16 +145,17 @@ function formatPrice(price) {
 function transformData(data) {
     return data.map(item => {
         const client = {
-            id: item.clientid,
+            id: item.clientId,
             name: item.name,
             address: item.address,
             phone: item.phone
         };
 
         const cake = {
-            id: item.cakeid,
-            name: item.description,
+            id: item.cakeId,
+            name: item.cakeName,
             price: formatPrice(item.price),
+            description: item.description,
             image: item.image
         };
 
