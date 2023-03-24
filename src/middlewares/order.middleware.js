@@ -11,7 +11,7 @@ export async function orderValidation(req, res, next) {
         if (error) {
             console.log(error)
 
-            if (error.details[0].message === `"quantity" must be less than or equal to 5`){
+            if (error.details[0].message === `"quantity" must be less than or equal to 4`){
                 return res.status(400).send(error)
             } else {
                 return res.status(422).send(error)

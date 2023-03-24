@@ -9,10 +9,11 @@ export async function registerOrder(req, res) {
     try {
 
         const client = await db.query(`SELECT id FROM clients WHERE id = $1`, [order.clientId])
+        
 
         if (client.rowCount === 0) {
             return res.status(404).send("Client does not exist")
-        }
+        } 
 
         const cake = await db.query(`SELECT id FROM cakes WHERE id = $1`, [order.cakeId])
         if (cake.rowCount === 0) {
