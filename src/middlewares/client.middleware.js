@@ -19,7 +19,7 @@ export async function clientValidation(req, res, next) {
             } else if (error.details[0].message === `"address" is not allowed to be empty`){
                 return res.status(400).send("error.details[0].message")
             } else {
-                return res.status(422).send("There is a problem with your data)
+                return res.status(422).send("There is a problem with your data")
             }
         }
     }

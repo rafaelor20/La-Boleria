@@ -9,8 +9,14 @@ export async function cakeValidation(req, res, next) {
 
     try {
         if (error) {
-            console.log(error)
-            return res.status(422).send("Há um erro com os dados")
+            
+            if (error.details[0].message === `"name" length must be at least 2 characters long`){
+                return res.status(400).send(error.details[0].message)
+            } else if (error.details[0].message === `"price" must be greater than 0`){
+                return res.status(400).send(error.details[0].message)
+            } else {
+                return res.status(422).send(error.details[0].message)
+            }
         }
     }
     catch (error) {
