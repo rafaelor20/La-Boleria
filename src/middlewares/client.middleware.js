@@ -9,8 +9,18 @@ export async function clientValidation(req, res, next) {
 
     try {
         if (error) {
-            console.log(error)
-            return res.status(422).send("Há um erro com os dados")
+            console.log(error.details[0].message)
+            if (error.details[0].message === `"phone"length must be at least 10 characters long`){
+                return res.status(400).send("Phone must have 10 or 11 digits")
+            } else if (error.details[0].message === `"phone" length must be less than or equal to 11 characters long`){
+                return res.status(400).send("Phone must have 10 or 11 digits")
+            } else if (error.details[0].message === `"name" is not allowed to be empty`){
+                return res.status(400).send("error.details[0].message")
+            } else if (error.details[0].message === `"address" is not allowed to be empty`){
+                return res.status(400).send("error.details[0].message")
+            } else {
+                return res.status(422).send("There is a problem with your data)
+            }
         }
     }
     catch (error) {
